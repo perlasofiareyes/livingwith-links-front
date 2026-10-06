@@ -1,0 +1,96 @@
+{
+  "profile": {
+    "name": "Sofia",
+    "handle": "@livingwith_sofiaa",
+    "tagline": "running, good food & everyday balance",
+    "bio": "Corriendo, comiendo rico y tratando de balancear uni, work y vida. Aquí está todo lo que uso, lo que hago y cómo trabajar juntas.",
+    "avatar": ""
+  },
+  "links": [
+    {
+      "id": "canva-templates",
+      "title": "Mis plantillas de Canva",
+      "subtitle": "Carruseles y stories listos para editar",
+      "url": "",
+      "icon": "canva",
+      "highlight": true,
+      "status": "soon"
+    },
+    {
+      "id": "tiktok",
+      "title": "TikTok",
+      "subtitle": "@livingwith_sofiaa",
+      "url": "https://www.tiktok.com/@livingwith_sofiaa",
+      "icon": "tiktok"
+    },
+    {
+      "id": "instagram",
+      "title": "Instagram",
+      "subtitle": "@livingwith_sofiaa",
+      "url": "https://www.instagram.com/livingwith_sofiaa/",
+      "icon": "instagram"
+    },
+    {
+      "id": "garmin-claude-guide",
+      "title": "Guía: conecta tu Garmin con Claude",
+      "subtitle": "Analiza tus runs, sueño y HRV con IA",
+      "post": "garmin-claude",
+      "icon": "watch",
+      "highlight": true
+    },
+    {
+      "id": "pinterest",
+      "title": "Pinterest",
+      "subtitle": "Recetas, outfits de running y moodboards",
+      "url": "",
+      "icon": "pinterest",
+      "status": "soon"
+    },
+    {
+      "id": "favorites",
+      "title": "Mis favoritos",
+      "subtitle": "Lo que uso para correr, comer y organizarme",
+      "section": "favorites",
+      "icon": "heart"
+    },
+    {
+      "id": "tips",
+      "title": "Tips & blog",
+      "subtitle": "Running, food y balance",
+      "section": "blog",
+      "icon": "book"
+    },
+    {
+      "id": "collab",
+      "title": "Colaboremos",
+      "subtitle": "Marcas, UGC y proyectos",
+      "section": "collab",
+      "icon": "sparkle"
+    }
+  ],
+  "favorites": [],
+  "collab": {
+    "intro": "¿Tienes una marca de running, wellness o comida y quieres crear algo juntas? Cuéntame tu idea y te respondo.",
+    "types": [
+      "Colaboración de marca",
+      "Contenido UGC",
+      "Plantillas de Canva a la medida",
+      "Otro"
+    ]
+  },
+  "posts": [
+    {
+      "title": "Cómo conectar tu Garmin con Claude",
+      "slug": "garmin-claude",
+      "date": "2026-10-06",
+      "tags": [
+        "running",
+        "garmin",
+        "ia"
+      ],
+      "excerpt": "Baja tus actividades, sueño y HRV de Garmin Connect a un archivo y deja que Claude te ayude a leerlos — y hasta a subir workouts a tu reloj.",
+      "draft": false,
+      "body": "\nEsta es la forma en la que yo conecto mi Garmin con Claude para entender mejor mis entrenamientos. No es una app oficial: es un mini proyecto en Visual Studio Code con Python que baja tus datos de Garmin Connect a un archivo, y luego Claude los analiza contigo.\n\n> **Importante:** esto usa [`python-garminconnect`](https://github.com/cyberjunky/python-garminconnect), una librería **no oficial** de la comunidad. Garmin puede cambiar cosas y dejar de funcionar en cualquier momento. Úsala con tu propia cuenta y bajo tu propio riesgo.\n\n## Lo que necesitas\n\n- Una cuenta de Garmin Connect con tu reloj sincronizado\n- Python 3 instalado\n- Visual Studio Code (o la terminal que prefieras)\n- Claude (la app, o Claude Code dentro de VS Code)\n\n## 1. Crea tu carpeta e instala la librería\n\nCrea una carpeta para el proyecto (yo le puse `garmin-ai`) y ábrela en VS Code. En la terminal:\n\n```bash\npip install garminconnect\n```\n\n## 2. Inicia sesión una sola vez\n\nEl script pide tu contraseña **en la terminal** (nunca la escribas dentro del código) y guarda un token en `~/.garminconnect`. Después de eso ya no necesitas volver a meter la contraseña hasta que el token caduque.\n\n```python\nfrom garminconnect import Garmin\nfrom pathlib import Path\nimport getpass\n\nTOKEN_DIR = str(Path.home() / \".garminconnect\")\n\nemail = input(\"Email de Garmin: \")\npw = getpass.getpass(\"Contraseña: \")\nclient = Garmin(email=email, password=pw)\nclient.login(TOKEN_DIR)  # guarda el token aquí\n```\n\nSi te sale un error 429 (*too many requests*), espera unos minutos antes de intentar otra vez.\n\n## 3. Baja tus datos a un archivo\n\nCon el token guardado, un segundo script baja tus últimos días: actividades (distancia, duración, ritmo, FC promedio/máxima, VO2 max) y wellness (pasos, FC en reposo, sueño, estrés y HRV). Todo se guarda en `garmin/data.json`.\n\n```python\nfrom garminconnect import Garmin\nfrom datetime import date, timedelta\nfrom pathlib import Path\nimport json\n\nclient = Garmin()\nclient.login(str(Path.home() / \".garminconnect\"))\n\ntoday = date.today()\nstart = today - timedelta(days=7)\ndata = {\"activities\": client.get_activities_by_date(start.isoformat(), today.isoformat()),\n        \"wellness\": {}}\n\nfor i in range(8):\n    d = (start + timedelta(days=i)).isoformat()\n    data[\"wellness\"][d] = {\n        \"stats\": client.get_stats(d),\n        \"sleep\": client.get_sleep_data(d),\n        \"hrv\": client.get_hrv_data(d),\n    }\n\nPath(\"garmin\").mkdir(exist_ok=True)\nPath(\"garmin/data.json\").write_text(json.dumps(data, indent=2, default=str))\n```\n\n## 4. Pídele a Claude que lo lea\n\nSi usas **Claude Code en VS Code**, abre la carpeta y pídele algo como:\n\n- *\"Lee garmin/data.json y dime cómo vienen mis ritmos esta semana vs. la anterior.\"*\n- *\"¿Mi sueño y HRV de los últimos días dicen que debería bajarle a la intensidad mañana?\"*\n- *\"Hazme una tabla de mis runs con distancia, ritmo y FC promedio.\"*\n\nSi usas la **app de Claude**, puedes subir el `data.json` directamente al chat y hacer las mismas preguntas.\n\n## 5. Bonus: sube workouts a tu reloj\n\nLa misma librería permite crear entrenamientos estructurados (calentamiento, intervalos, enfriamiento) en Garmin Connect, que luego se sincronizan a tu reloj. Yo le pido a Claude que convierta mi plan de entrenamiento en un script que los suba semana por semana — así no los armo a mano en la app.\n\n## Tips de seguridad\n\n- Nunca pegues tu contraseña dentro del código ni la subas a GitHub.\n- Agrega `.garminconnect/` y tus archivos `.json` a tu `.gitignore`: tienen datos personales.\n- Si compartes tu proyecto, comparte el código, no tus datos.\n\n¿Lo intentas? Cuéntame en TikTok o Instagram cómo te fue ✨\n"
+    }
+  ]
+}
