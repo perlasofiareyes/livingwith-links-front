@@ -1,6 +1,6 @@
 # livingwith-links-front
 
-Landing tipo link-in-bio de **@livingwith_sofiaa** — plantillas de Canva, TikTok, Instagram, Pinterest, la guía de Garmin + Claude, favoritos, blog de tips y formulario de colaboraciones.
+Landing tipo link-in-bio de **@livingwsofiaa** — plantillas de Canva, TikTok, Instagram, Pinterest, la guía de Garmin + Claude, favoritos, blog de tips y formulario de colaboraciones.
 
 HTML/CSS/JS puro, sin build. Se publica gratis en **GitHub Pages**.
 Backend: [`livingwith-links-api`](https://github.com/perlasofiareyes/livingwith-links-api) (Railway).

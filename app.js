@@ -248,7 +248,7 @@
     bindCollab();
     if (view) window.scrollTo(0, 0);
     const title = app.querySelector("h1");
-    document.title = view && title ? `${title.textContent} · livingwith_sofiaa` : "Sofia · livingwith_sofiaa";
+    document.title = view && title ? `${title.textContent} · livingwsofiaa` : "Sofia · livingwsofiaa";
   }
 
   app.addEventListener("click", (e) => {
